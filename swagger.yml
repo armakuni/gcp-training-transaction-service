@@ -1,0 +1,78 @@
+---
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Transaction Service API
+  description: Provide transaction functionality
+
+host: localhost:5002
+schemes:
+  - http
+
+paths:
+  /transactions/health:
+    get:
+      summary: Check the health of the service
+      description: Returns a message indicating the health of the service
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Service is up and running
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Contains the string OK
+  /transactions:
+    post:
+      summary: Create a new transaction record
+      description: 
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Transaction object that needs to be added to the database
+          required: true
+          schema:
+            $ref: "#/definitions/Transaction"
+      responses:
+        405:
+          description: Invalid input
+        200:
+          description: Received ok and will process shortly.
+        404:
+          description: Operation failed
+definitions:
+  Transaction:
+    type: "object"
+    required:
+    - "id"
+    - "accountNumber"
+    - "amount"
+    - "operation"
+    - "status"
+    - "created"
+    properties:
+      id:
+        type: "string"
+      accountNumber:
+        type: "string"
+        format: "int64"
+      amount:
+        type: "integer"
+        format: "int64"
+      operation:
+        type: "string"
+        enum:
+        - "credit"
+        - "debit"
+      status:
+        type: "string"
+      created:
+        type: "string"

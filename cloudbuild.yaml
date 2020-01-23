@@ -1,0 +1,49 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}', '.']
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}"]
+
+  - name: '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}'
+    args: ['make', 'lint']
+
+  - name: '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}'
+    args: ['make', 'tests']
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "${_SERVICE_NAME}",
+        "--image",
+        "${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}",
+        "--update-env-vars",
+        "TRANSACTION_NAMESPACE=${_TRANSACTION_NAMESPACE},BALANCE_TOPIC_ID=${_BALANCE_TOPIC_ID},ACCOUNTS_SERVICE_URL=${_ACCOUNTS_SERVICE_URL}",
+        "--region",
+        "${_REGION}",
+        "--allow-unauthenticated",
+        "--platform",
+        "managed",
+      ]
+
+  - id: "store transaction service url"
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        transaction_url=$(gcloud run services describe ${_SERVICE_NAME} --platform=managed --region=europe-west1 | grep https://${_SERVICE_NAME})
+        check_command=gcloud pubsub subscriptions list | grep "topic: ${transaction_url}"
+        create_command=gcloud pubsub subscriptions create push_transactions_to_service --topic=${_TRANSACTION_NAMESPACE} --push-endpoint=${transaction_url}/transactions
+
+        $check_command || $create_command
+
+substitutions:
+  _CONTAINER_HOSTNAME: eu.gcr.io
+  _SERVICE_NAME: gcp-training-transaction-service
+  _REGION: europe-west1
+  _TRANSACTION_NAMESPACE: transactions
+  _BALANCE_TOPIC_ID: balance
+  _ACCOUNTS_SERVICE_URL: http://localhost:5001
