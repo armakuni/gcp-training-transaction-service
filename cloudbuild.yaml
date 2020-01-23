@@ -28,7 +28,7 @@ steps:
         "managed",
       ]
 
-  - id: "store transaction service url"
+  - id: "create pubsub subscription"
     name: gcr.io/cloud-builders/gcloud
     entrypoint: /bin/bash
     args:
