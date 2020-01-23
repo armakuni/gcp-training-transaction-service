@@ -1,15 +1,15 @@
 steps:
+  - name: 'cnservices/python-virtualenv'
+    args: ['make', 'lint']
+
+  - name: 'cnservices/python-virtualenv'
+    args: ['make', 'tests']
+
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}', '.']
 
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}"]
-
-  - name: '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}'
-    args: ['make', 'lint']
-
-  - name: '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}'
-    args: ['make', 'tests']
 
   - name: "gcr.io/cloud-builders/gcloud"
     args:
