@@ -35,11 +35,29 @@ steps:
       - -c
       - |
         transaction_url=$(gcloud run services describe ${_SERVICE_NAME} --platform=managed --region=europe-west1 | grep https://${_SERVICE_NAME})
-        check_command=gcloud pubsub subscriptions list | grep "topic: ${transaction_url}"
-        create_command=gcloud pubsub subscriptions create push_transactions_to_service --topic=${_TRANSACTION_NAMESPACE} --push-endpoint=${transaction_url}/transactions
+        check_command=$(gcloud pubsub subscriptions list | grep "${transaction_url}")
+        if [[ $check_command = '' ]]; then
+          gcloud pubsub subscriptions create push_transactions_to_service --topic=transactions --push-endpoint=${transaction_url}/transactions
+        else
+          echo Subscription already exists
+        fi
 
-        $check_command || $create_command
-
+  - id: "create transactions collection index"
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        index_ref=$(gcloud alpha firestore indexes composite list | grep transactions)
+        if [[ $index_ref = '' ]]; then
+          gcloud alpha firestore indexes composite create \
+          --collection-group=${_TRANSACTION_NAMESPACE} \
+          --field-config field-path=account_number,order=ascending \
+          --field-config field-path=timestamp,order=descending
+        else
+          echo Composite Index already exists
+        fi
+        
 substitutions:
   _CONTAINER_HOSTNAME: eu.gcr.io
   _SERVICE_NAME: gcp-training-transaction-service
