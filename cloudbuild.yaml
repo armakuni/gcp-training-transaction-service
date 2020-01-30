@@ -3,7 +3,7 @@ steps:
     args: ['make', 'lint']
 
   - name: 'cnservices/python-virtualenv'
-    args: ['make', 'tests']
+    args: ['make', 'test']
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', '${_CONTAINER_HOSTNAME}/$PROJECT_ID/${_SERVICE_NAME}', '.']
