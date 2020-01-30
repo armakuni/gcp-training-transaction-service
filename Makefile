@@ -6,6 +6,7 @@ VENV_ACTIVATE_PATH=$(VENV_NAME)/bin/activate
 PYTHON_PATH=${VENV_NAME}/bin/python3
 
 venv: requirements.txt ## Setup virtual environment and dependencies
+		pip3 install virtualenv
 		test -d $(VENV_NAME) || virtualenv --python=python3 $(VENV_NAME)
 		. $(VENV_ACTIVATE_PATH); pip install -Ur requirements.txt
 		touch $(VENV_ACTIVATE_PATH)
