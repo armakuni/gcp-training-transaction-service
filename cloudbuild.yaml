@@ -48,16 +48,16 @@ steps:
     args:
       - -c
       - |
-        index_ref=$(gcloud alpha firestore indexes composite list | grep transactions)
+        index_ref=$(gcloud firestore indexes composite list | grep transactions)
         if [[ $index_ref = '' ]]; then
-          gcloud alpha firestore indexes composite create \
+          gcloud firestore indexes composite create \
           --collection-group=${_TRANSACTION_NAMESPACE} \
           --field-config field-path=account_number,order=ascending \
           --field-config field-path=timestamp,order=descending
         else
           echo Composite Index already exists
         fi
-        
+
 substitutions:
   _CONTAINER_HOSTNAME: eu.gcr.io
   _SERVICE_NAME: gcp-training-transaction-service
