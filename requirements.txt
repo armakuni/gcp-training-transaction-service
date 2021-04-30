@@ -64,7 +64,7 @@ schema==0.7.1
 six==1.13.0
 soupsieve==1.9.5
 structlog==19.2.0
-urllib3==1.25.7
+urllib3==1.25.8
 virtualenv
 wcwidth==0.1.8
 Werkzeug==0.16.0
